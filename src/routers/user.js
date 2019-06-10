@@ -6,30 +6,29 @@ const auth = require('../middleware/auth')
 const { sendWelcomeEmail, sendCancelationEmail } = require('../emails/account')
 const router = new express.Router()
 
-router.post('/users', async (req, res) => {
+router.post('/signup', async (req, res) => {
     const user = new User(req.body)
     
     try {
         await user.save()       
         sendWelcomeEmail(user.email, user.name)
-        const token = await user.generateAuthToken()
-        res.status(201).send({user , token})
+        res.status(201).send(user)
     } catch (e) {
-        res.status(400).send(e)
+        res.status(400).json({error: e.errmsg ? e.errmsg : e.errors})
     }
 })
 
-router.post('/users/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken()
         res.send({ user , token })
     } catch (e) {
-        res.status(400).send()
+        res.status(400).json({error: e.message})
     }
 })
 
-router.post('/users/logout', auth, async (req , res) => {
+router.post('/logout', auth, async (req , res) => {
     try {
         req.user.tokens = req.user.tokens.filter((token) => {
             return token.token !== req.token
@@ -42,7 +41,7 @@ router.post('/users/logout', auth, async (req , res) => {
     }
 })
 
-router.post('/users/logoutAll', auth, async (req , res) => {
+router.post('/logoutAll', auth, async (req , res) => {
     try {
         req.user.tokens = []
         await req.user.save()

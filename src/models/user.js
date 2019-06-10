@@ -7,28 +7,28 @@ const Task = require('./task')
 const accommodationSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true, 
+        required: [true, 'Your accommodation name cannot be blank.'],
         trim: true
     },
     street: {
         type: String,
-        required: true
+        required: [true, 'Your street cannot be blank.']
     },
     zipcode: {
         type: String,
-        required: true,
-        minlength: 4,
+        required: [true, 'Your zipcode cannot be blank.'],
+        minlength: [4, 'Display name must be at least 4 characters.'],
         trim: true
     },
     city: {
         type: String,
-        required: true, 
+        required: [true, 'Your city cannot be blank.'],
         trim: true,
         lowercase: true
     },
     country: {
         type: String,
-        required: true, 
+        required: [true, 'Your country cannot be blank.'],
         trim: true,
         lowercase: true
     }
@@ -37,15 +37,17 @@ const accommodationSchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true, 
+        required: [true, 'Your display name cannot be blank.'],
+        minlength: [3, 'Display name must be at least 3 characters.'],
+        maxlength: [20, 'Display name must be less than 20 characters.'],
         trim: true
     },
     email: {
         type: String,
-        unique: true,
-        required: true,
+        required: [true, 'Your display name cannot be blank.'],
         trim: true,
         lowercase: true, 
+        unique: true,
         validate(value){
             if(!validator.isEmail(value)){
                 throw new Error('Email is invalid')
@@ -54,8 +56,8 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
-        minlength: 7,
+        required: [true, 'Your password cannot be blank.'],
+        minlength: [7, 'Password must be at least 7 characters.'],
         trim: true,
         validate(value){
             if(value.toLowerCase().includes('password')){
@@ -65,7 +67,7 @@ const userSchema = new mongoose.Schema({
     },
     countryOfOrigin: {
         type: String,
-        required: true, 
+        required: [true, 'Your password cannot be blank.'],
         trim: true,
         lowercase: true
     },
