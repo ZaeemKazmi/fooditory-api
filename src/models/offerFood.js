@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const offerFoodSchema = new mongoose.Schema(
   {
+	  buyerId: {
+      type: String,
+      trim: true
+    }, 
     name: {
       type: String,
       required: [true, "Item name cannot be blank."],
