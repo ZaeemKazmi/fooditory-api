@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const offerFoodSchema = new mongoose.Schema(
+const itemSchema = new mongoose.Schema(
   {
 	  buyerId: {
       type: String,
@@ -45,6 +45,6 @@ const offerFoodSchema = new mongoose.Schema(
   }
 );
 
-const OfferFood = mongoose.model("OfferFood", offerFoodSchema);
+const Item = mongoose.model("Item", itemSchema);
 
-module.exports = OfferFood;
+module.exports = Item;

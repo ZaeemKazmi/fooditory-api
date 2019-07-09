@@ -3,14 +3,14 @@ const auth = require("../middleware/auth");
 const router = new express.Router();
 const multer = require('multer')
 const sharp = require('sharp')
-const OfferFood = require('../models/offerFood')
+const Item = require('../models/item')
 
-router.post("/offerFood", async (req, res) => {
- const offerFood = new OfferFood(req.body)
+router.post("/item", async (req, res) => {
+ const item = new Item(req.body)
     
     try {
-        await offerFood.save()       
-        res.status(201).send(offerFood)
+        await item.save()       
+        res.status(201).send(item)
     } catch (e) {
         res.status(400).json({error: e.errmsg ? e.errmsg : e.errors})
     }

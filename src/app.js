@@ -4,7 +4,7 @@ require("./db/mongoose");
 const morgan = require("morgan");
 const userRouter = require("./routers/user");
 const taskRouter = require("./routers/task");
-const offerFoodRouter = require("./routers/offerFood");
+const itemRouter = require("./routers/item");
 
 const app = express();
 app.use(
@@ -21,6 +21,6 @@ app.use(morgan("dev"));
 
 app.use(userRouter);
 app.use(taskRouter);
-app.use(offerFoodRouter);
+app.use(itemRouter);
 
 module.exports = app;
