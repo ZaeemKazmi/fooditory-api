@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const itemSchema = new mongoose.Schema(
   {
-	  buyerId: {
+    buyerId: {
       type: String,
       trim: true
-    }, 
+    },
     name: {
       type: String,
       required: [true, "Item name cannot be blank."],
@@ -37,7 +37,8 @@ const itemSchema = new mongoose.Schema(
       trim: true
     },
     image: {
-      type: Buffer
+      type: String,
+      required: true
     }
   },
   {
