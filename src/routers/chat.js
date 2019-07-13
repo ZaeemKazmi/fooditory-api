@@ -88,7 +88,7 @@ const setIo = server => {
     })
 }
 
-router.get('/chats', auth, async (req, res) => {
+router.get('/conversations', auth, async (req, res) => {
     try {
         // Also correct code --- but not recommended as it applies aggregate functions 
         // which consume high memory --- do not delete this for future reference:---
@@ -126,9 +126,44 @@ router.get('/chats', auth, async (req, res) => {
                 { "buyerId": req.user._id },
                 { "sellerId": req.user._id }
             ],
-        }).sort({ "updatedAt": -1}).populate('messages').exec();
+        }).sort({ "updatedAt": 1}).populate('messages').exec();
         res.json(chats)
     } catch (e) { console.log(e) }
+})
+
+// Returns all for specific user, if logged in user is a sender or receiver of it
+router.get('/chats', auth, async (req, res) => {
+    const _id = req.params.id
+
+    try {
+        const chats = await Chat.find({
+            "$or": [
+                { "buyerId": req.user._id },
+                { "sellerId": req.user._id }
+            ],
+        }).sort({ "updatedAt": -1});
+        res.json(chats)
+    } catch (e) { console.log(e) }
+})
+
+// Returns messages for specific chat, if logged in user is a sender or receiver of it
+router.get('/messages/:id', auth, async (req, res) => {
+    const _id = req.params.id
+
+    try {
+        const chat = await Chat.findOne({ _id , 
+            "$or": [
+            { "buyerId": req.user._id },
+            { "sellerId": req.user._id }
+        ]}).sort({ "createdAt": 1}).populate('messages').exec();
+
+        if(!chat){
+            return res.status(404).send()
+        }
+        res.json(chat.messages)
+    } catch (e) {
+        res.status(500).send()
+    }
 })
 
 module.exports = { setIo, router }
