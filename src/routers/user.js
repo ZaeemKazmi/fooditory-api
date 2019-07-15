@@ -34,7 +34,7 @@ const upload = multer({
 
 router.post("/signup", upload.single("image"), (req, res, next) => {
   console.log(req.file);
-
+  sendWelcomeEmail(req.body.email, req.body.name);
   const user = new User({
     name: req.body.name,
     email: req.body.email,
