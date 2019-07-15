@@ -3,7 +3,10 @@ const auth = require("../middleware/auth");
 const router = new express.Router();
 const multer = require("multer");
 const sharp = require("sharp");
+
 const Item = require("../models/item");
+const User = require('../models/user')
+
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -31,19 +34,19 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-router.post("/item", upload.single("image"), (req, res, next) => {
-  console.log(req.file);
+
+router.post("/item", auth, upload.single("image"), async (req, res, next) => {
+  const user = await User.findOne({_id: req.user._id});
+  if (user == null) {
+    res.status(400).json({error: "The user does not exist"});
+    return;
+  }
 
   const item = new Item({
-    buyerId: "",
-    sellerId: req.body.sellerId,
-    name: req.body.name,
-    ingredients: req.body.ingredients,
-    cuisine: req.body.cuisine,
-    price: req.body.price,
-    currency: req.body.currency,
+    ...req.body,
+    image: req.file.path,
     status: true,
-    image: req.file.path
+    owner: user
   });
   item
     .save()
@@ -69,5 +72,21 @@ router.post("/item", upload.single("image"), (req, res, next) => {
       });
     });
 });
+
+router.get('/:user_id/items', async (req, res) => {
+  const user = await User.findOne({_id: req.params.user_id});
+  if (user == null) {
+    res.status(400).json({error: "The user does not exist"});
+    return;
+  }
+
+  try {
+    const items = await Item.find({owner: user._id, status: true});
+
+    res.send(items)
+  } catch (e) {
+    res.status(400).send(e)
+  }
+})
 
 module.exports = router;

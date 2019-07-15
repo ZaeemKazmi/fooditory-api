@@ -175,6 +175,11 @@ router.delete("/users/me", auth, async (req, res) => {
   }
 });
 
+router.get("/users", async (req, res) => {
+  const users = await User.find();
+  res.send(users);
+});
+
 router.delete("/users/me/avatar", auth, async (req, res) => {
   req.user.avatar = undefined;
   await req.user.save();
