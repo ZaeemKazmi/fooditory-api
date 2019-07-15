@@ -1,155 +1,164 @@
-const mongoose = require('mongoose')
-const validator = require('validator')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const Task = require('./task')
+const mongoose = require("mongoose");
+const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const Task = require("./task");
 
 const accommodationSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Your accommodation name cannot be blank.'],
-        trim: true
-    },
-    street: {
-        type: String,
-        required: [true, 'Your street cannot be blank.']
-    },
-    zipcode: {
-        type: String,
-        required: [true, 'Your zipcode cannot be blank.'],
-        minlength: [4, 'Display name must be at least 4 characters.'],
-        trim: true
-    },
-    city: {
-        type: String,
-        required: [true, 'Your city cannot be blank.'],
-        trim: true,
-        lowercase: true
-    },
-    country: {
-        type: String,
-        required: [true, 'Your country cannot be blank.'],
-        trim: true,
-        lowercase: true
-    }
-})
+  name: {
+    type: String,
+    required: [true, "Your accommodation name cannot be blank."],
+    trim: true
+  },
+  street: {
+    type: String,
+    required: [true, "Your street cannot be blank."]
+  },
+  zipcode: {
+    type: String,
+    required: [true, "Your zipcode cannot be blank."],
+    minlength: [4, "Display name must be at least 4 characters."],
+    trim: true
+  },
+  city: {
+    type: String,
+    required: [true, "Your city cannot be blank."],
+    trim: true,
+    lowercase: true
+  },
+  country: {
+    type: String,
+    required: [true, "Your country cannot be blank."],
+    trim: true,
+    lowercase: true
+  }
+});
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: [true, 'Your display name cannot be blank.'],
-        minlength: [3, 'Display name must be at least 3 characters.'],
-        maxlength: [20, 'Display name must be less than 20 characters.'],
-        trim: true
+      type: String,
+      required: [true, "Your display name cannot be blank."],
+      minlength: [3, "Display name must be at least 3 characters."],
+      maxlength: [20, "Display name must be less than 20 characters."],
+      trim: true
     },
     email: {
-        type: String,
-        required: [true, 'Your display name cannot be blank.'],
-        trim: true,
-        lowercase: true, 
-        unique: true,
-        validate(value){
-            if(!validator.isEmail(value)){
-                throw new Error('Email is invalid')
-            }
+      type: String,
+      required: [true, "Your display name cannot be blank."],
+      trim: true,
+      lowercase: true,
+      unique: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Email is invalid");
         }
+      }
     },
     password: {
-        type: String,
-        required: [true, 'Your password cannot be blank.'],
-        minlength: [7, 'Password must be at least 7 characters.'],
-        trim: true,
-        validate(value){
-            if(value.toLowerCase().includes('password')){
-                throw new Error('Password cannot contain "password"')
-            }
+      type: String,
+      required: [true, "Your password cannot be blank."],
+      minlength: [7, "Password must be at least 7 characters."],
+      trim: true,
+      validate(value) {
+        if (value.toLowerCase().includes("password")) {
+          throw new Error('Password cannot contain "password"');
         }
+      }
+    },
+    image: {
+      type: String,
+      required: true
     },
     countryOfOrigin: {
-        type: String,
-        required: [true, 'Your password cannot be blank.'],
-        trim: true,
-        lowercase: true
+      type: String,
+      required: [true, "Your password cannot be blank."],
+      trim: true,
+      lowercase: true
     },
     accommodation: {
-        type: accommodationSchema,
-        required: true
+      type: accommodationSchema,
+      required: true
     },
-    tokens: [{
+    tokens: [
+      {
         token: {
-            type: String,
-            required: true
+          type: String,
+          required: true
         }
-    }],
+      }
+    ],
     avatar: {
-        type: Buffer
+      type: Buffer
     }
-}, {
+  },
+  {
     timestamps: true
-})
+  }
+);
 
-userSchema.virtual('tasks', {
-    ref: 'Task', 
-    localField: '_id',
-    foreignField: 'owner'
-})
+userSchema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner"
+});
 
-userSchema.methods.toJSON = function ( ) {
-    const user = this
-    const userObject = user.toObject()
+userSchema.methods.toJSON = function() {
+  const user = this;
+  const userObject = user.toObject();
 
-    delete userObject.password
-    delete userObject.tokens
-    delete userObject.avatar
+  delete userObject.password;
+  delete userObject.tokens;
+  delete userObject.avatar;
 
-    return userObject
-}
+  return userObject;
+};
 
-userSchema.methods.generateAuthToken = async function ( ) {
-    const user = this
-    const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
+userSchema.methods.generateAuthToken = async function() {
+  const user = this;
+  const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
 
-    user.tokens = user.tokens.concat({ token })
-    await user.save()
+  user.tokens = user.tokens.concat({ token });
+  await user.save();
 
-    return token
-}
+  return token;
+};
 
-userSchema.statics.findByCredentials = async (email , password) => {
-    const user = await User.findOne({ email })
+userSchema.statics.findByCredentials = async (email, password) => {
+  const user = await User.findOne({ email });
 
-    if (!user) {
-        throw new Error('Unable to login')
-    }
+  if (!user) {
+    throw new Error("Unable to login");
+  }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+  const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
-        throw new Error('Unable to login')
-    }
+  if (!isMatch) {
+    throw new Error("Unable to login");
+  }
 
-    return user
-}
+  return user;
+};
 
 // Hash the plain text password before saving
-userSchema.pre('save', async function (next) {
-    const user = this
+userSchema.pre("save", async function(next) {
+  const user = this;
 
-    if (user.isModified('password')){
-        user.password = await bcrypt.hash(user.password, 8)
-    }
-    console.log('just before saving!')
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  console.log("just before saving!");
 
-    next()
-})
+  next();
+});
 
 // Delete user tasks when user is removed
-userSchema.pre('remove', async function (next) {
-    const user = this
-    await Task.deleteMany({ owner: user._id })
-    next()
-})
+userSchema.pre("remove", async function(next) {
+  const user = this;
+  await Task.deleteMany({ owner: user._id });
+  next();
+});
 
-const User = mongoose.model('User', userSchema)
+const User = mongoose.model("User", userSchema);
 
-module.exports = User
+module.exports = User;
