@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const itemSchema = new mongoose.Schema(
   {
+    sellerId: {
+      type: String,
+      trim: true
+    },
     buyerId: {
       type: String,
       trim: true

@@ -35,6 +35,7 @@ router.post("/item", upload.single("image"), (req, res, next) => {
   console.log(req.file);
 
   const item = new Item({
+    sellerId: req.body.sellerId,
     name: req.body.name,
     ingredients: req.body.ingredients,
     cuisine: req.body.cuisine,
