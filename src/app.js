@@ -4,6 +4,7 @@ const http = require('http')
 require('./db/mongoose')
 const morgan = require('morgan');
 const userRouter = require('./routers/user')
+const itemRouter = require('./routers/item')
 const taskRouter = require('./routers/task')
 const {setIo: setChatIo, router: chatRouter} = require('./routers/chat')
 
@@ -21,8 +22,11 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(morgan("dev"));
 
+app.use("/uploads", express.static("uploads"));
+
 app.use(userRouter)
 app.use(taskRouter)
+app.use(itemRouter)
 app.use(chatRouter)
 
 const server = http.createServer(app)
