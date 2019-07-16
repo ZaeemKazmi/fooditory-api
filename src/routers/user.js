@@ -139,7 +139,7 @@ router.get('/user/:id', auth, async (req, res) => {
         if(!user){
             return res.status(404).send()
         }
-        res.send(JSON.stringify(user))
+        res.json(user)
     } catch (e) {
         res.status(500).send()
     }
