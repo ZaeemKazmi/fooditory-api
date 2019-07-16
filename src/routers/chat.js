@@ -20,17 +20,15 @@ const setIo = server => {
             console.log("itemId1 ", data["itemId"])
             console.log("itemId2 ", new ObjectID(data["itemId"]))
 
+            const _id = new ObjectID(data["chatId"])
+
             try {
-                const existingChat = await Chat.findOne({
-                    $or: [
-                        { itemId: new ObjectID(data["itemId"]), buyerId: new ObjectID(data["senderId"]) },
-                        { itemId: new ObjectID(data["itemId"]), sellerId: new ObjectID(data["senderId"]) }
-                    ]
-                })
+                const existingChat = await Chat.findOne({_id})
 
                 if (!existingChat) {     // If chat does not exists yet
                     console.log("Conversation not yet started")
                     const chat = new Chat({
+                        _id: new ObjectID(data["chatId"]),
                         itemId: new ObjectID(data["itemId"]),
                         buyerId: new ObjectID(data["senderId"]),
                         sellerId: new ObjectID(data["receiverId"])
@@ -49,6 +47,7 @@ const setIo = server => {
 
                         const newMessage = await message.save()
 
+                        
                         if (newMessage === message) {
                             const toId = data["receiverId"]
                             console.log(toId)
@@ -126,7 +125,7 @@ router.get('/conversations', auth, async (req, res) => {
                 { "buyerId": req.user._id },
                 { "sellerId": req.user._id }
             ],
-        }).sort({ "updatedAt": 1}).populate('messages').exec();
+        }).sort({ "updatedAt": -1}).populate('messages').exec();
         res.json(chats)
     } catch (e) { console.log(e) }
 })
