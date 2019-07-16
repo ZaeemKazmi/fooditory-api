@@ -6,13 +6,29 @@ const sharp = require("sharp");
 const Item = require("../models/item");
 
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
+  destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
-  filename: function(req, file, cb) {
+  filename: function (req, file, cb) {
     cb(null, Date.now() + file.originalname);
   }
 });
+
+router.get('/itemInfo/:id', async (req, res) => {
+  const _id = req.params.id
+
+  try {
+    await Item.findOne({ _id })
+      .populate('seller')
+      .exec((err, item) => {
+        if (err) res.status(500).send()
+        res.send({ "sellerName": item.seller[0].name, "itemName": item.name, "status": item.status, "buyerId": item.buyerId });
+      });
+
+  } catch (e) {
+    res.status(500).send()
+  }
+})
 
 const fileFilter = (req, file, cb) => {
   // reject a file

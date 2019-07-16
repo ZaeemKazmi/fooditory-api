@@ -4,7 +4,8 @@ const itemSchema = new mongoose.Schema(
   {
     sellerId: {
       type: String,
-      trim: true
+      trim: true,
+      ref: 'User'
     },
     buyerId: {
       type: String,
@@ -46,9 +47,17 @@ const itemSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
+
+itemSchema.virtual('seller', {
+  ref: 'User',
+  localField: 'sellerId',
+  foreignField: '_id'
+});
 
 const Item = mongoose.model("Item", itemSchema);
 
