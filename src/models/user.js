@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const Task = require("./task");
 
 const accommodationSchema = new mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId,
   name: {
     type: String,
     required: [true, "Your accommodation name cannot be blank."],
@@ -94,7 +95,9 @@ const userSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
 
@@ -103,6 +106,12 @@ userSchema.virtual("tasks", {
   localField: "_id",
   foreignField: "owner"
 });
+
+userSchema.virtual('items', {
+  ref: 'Item', 
+  localField: '_id',
+  foreignField: 'sellerId'
+})
 
 userSchema.methods.toJSON = function() {
   const user = this;
