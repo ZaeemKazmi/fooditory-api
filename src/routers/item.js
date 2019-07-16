@@ -100,15 +100,14 @@ router.post("/item", auth, upload.single("image"), async (req, res, next) => {
   }
 
   const item = new Item({
-    buyerId: "",
-    sellerId: req.body.sellerId,
+    sellerId: user,
     name: req.body.name,
     ingredients: req.body.ingredients,
     cuisine: req.body.cuisine,
     price: req.body.price,
     currency: "Euro",
-    status: true,
-    owner: user
+    image: req.file.path,
+    status: true
   });
   item
     .save()
