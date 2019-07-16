@@ -23,7 +23,13 @@ const setIo = server => {
             const _id = new ObjectID(data["chatId"])
 
             try {
-                const existingChat = await Chat.findOne({_id})
+                const existingChat = await Chat.findOne({
+                    $or: [
+                        { itemId: new ObjectID(data["itemId"]), buyerId: new ObjectID(data["senderId"]) },
+                        // { itemId: new ObjectID(data["itemId"]), sellerId: new ObjectID(data["senderId"]) },
+                        {_id}
+                    ]
+                })
 
                 if (!existingChat) {     // If chat does not exists yet
                     console.log("Conversation not yet started")
