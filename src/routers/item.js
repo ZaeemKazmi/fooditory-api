@@ -73,7 +73,7 @@ router.post("/item", upload.single("image"), (req, res, next) => {
     ingredients: req.body.ingredients,
     cuisine: req.body.cuisine,
     price: req.body.price,
-    currency: req.body.currency,
+    currency: "Euro",
     status: true,
     image: req.file.path
   });
