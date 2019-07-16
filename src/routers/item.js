@@ -46,6 +46,31 @@ router.get('/items/:id', async (req, res) => {
   }
 })
 
+router.patch('/items/:id', auth, async (req, res) => {
+  const updates = Object.keys(req.body)
+  const allowedUpdates = ['sellerId', 'buyerId', 'name', 'ingredients', 'cuisine', 'price', 'status', 'image']
+  const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+
+  if (!isValidOperation) {
+      return res.status(400).send({error : 'Invalid updates!'})
+  }
+
+  try { 
+      const item = await Item.findOne({ _id: req.params.id , sellerId: req.user._id})
+
+      if(!item) {
+          return res.status(404).send()
+      } 
+
+      updates.forEach((update) => item[update] = req.body[update]) 
+      await item.save()
+
+      res.send(item)
+  } catch (e) {
+      res.status(400).send(e)
+  }
+})
+
 const fileFilter = (req, file, cb) => {
   // reject a file
   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
