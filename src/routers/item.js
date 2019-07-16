@@ -30,6 +30,22 @@ router.get('/itemInfo/:id', async (req, res) => {
   }
 })
 
+router.get('/items/:id', async (req, res) => {
+  const _id = req.params.id
+
+  try {
+    const item = await Item.findOne({ _id })
+
+    if (!item) {
+      return res.status(404).send()
+    }
+    res.json(item)
+    
+  } catch (e) {
+    res.status(500).send()
+  }
+})
+
 const fileFilter = (req, file, cb) => {
   // reject a file
   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
