@@ -9,7 +9,7 @@ const itemSchema = new mongoose.Schema(
     },
     buyerId: {
       type: mongoose.Schema.Types.ObjectId, 
-      required: true,
+      required: false,
       ref: 'User'
     },
     name: {

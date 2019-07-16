@@ -142,7 +142,7 @@ router.get('/:user_id/items', async (req, res) => {
   }
 
   try {
-    const items = await Item.find({owner: user._id, status: true});
+    const items = await Item.find({sellerId: user._id, status: true});
 
     res.send(items)
   } catch (e) {
