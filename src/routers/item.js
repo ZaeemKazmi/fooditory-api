@@ -95,7 +95,7 @@ const upload = multer({
 router.post("/item", auth, upload.single("image"), async (req, res, next) => {
   const user = await User.findOne({_id: req.user._id});
   if (user == null) {
-    res.status(400).json({error: "The user does not exist"});
+    res.status(404).json({error: "The user does not exist"});
     return;
   }
 

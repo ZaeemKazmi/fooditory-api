@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const sharp = require("sharp");
 const User = require("../models/user");
+const Item = require("../models/item");
 const auth = require("../middleware/auth");
 const { ObjectID } = require('mongodb')
 const { sendWelcomeEmail, sendCancelationEmail } = require("../emails/account");
@@ -131,18 +132,22 @@ router.get('/username/:id', async (req, res) => {
 })
 
 router.get('/user/:id', auth, async (req, res) => {
-    const _id = req.params.id
+  let seller = await User.findOne({_id: req.params.id});
+  if (seller == null) {
+    res.status(400).json({error: "The user does not exist"});
+    return;
+  }
 
-    try {
-        const user = await User.findOne({ _id })
+  try {
+    const transactions = await Item.findOne({sellerId: seller, buyerId: req.user});
 
-        if(!user){
-            return res.status(404).send()
-        }
-        res.json(user)
-    } catch (e) {
-        res.status(500).send()
-    }
+    seller = seller.toObject();
+    seller["allowReview"] = transactions != null;
+    res.json(seller);
+  } catch (e) {
+    console.log(e);
+    res.status(500).send();
+  }
 })
 
 router.patch("/users/me", auth, async (req, res) => {
@@ -195,10 +200,10 @@ router.get("/users/:id/avatar", async (req, res) => {
       throw new Error();
     }
 
-    // res.set("Content-Type", "image/png");
     res.sendfile(user.image);
   } catch (e) {
-    res.status(400).send(e);
+    console.log(e);
+    res.status(500).send(e);
   }
 });
 
