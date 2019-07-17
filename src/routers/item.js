@@ -6,70 +6,102 @@ const sharp = require("sharp");
 const Item = require("../models/item");
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function(req, file, cb) {
     cb(null, "uploads/");
   },
-  filename: function (req, file, cb) {
+  filename: function(req, file, cb) {
     cb(null, Date.now() + file.originalname);
   }
 });
 
-router.get('/itemInfo/:id', async (req, res) => {
-  const _id = req.params.id
+router.get("/itemInfo/:id", async (req, res) => {
+  const _id = req.params.id;
 
   try {
     await Item.findOne({ _id })
-      .populate('seller')
+      .populate("seller")
       .exec((err, item) => {
-        if (err) res.status(500).send()
-        res.send({ "sellerName": item.seller[0].name, "itemName": item.name, "status": item.status, "buyerId": item.buyerId });
+        if (err) res.status(500).send();
+        res.send({
+          sellerName: item.seller[0].name,
+          itemName: item.name,
+          status: item.status,
+          buyerId: item.buyerId
+        });
       });
-
   } catch (e) {
-    res.status(500).send()
+    res.status(500).send();
   }
-})
+});
 
-router.get('/items/:id', async (req, res) => {
-  const _id = req.params.id
+router.get("/items/:id", async (req, res) => {
+  const _id = req.params.id;
 
   try {
-    const item = await Item.findOne({ _id })
+    const item = await Item.findOne({ _id });
 
     if (!item) {
-      return res.status(404).send()
+      return res.status(404).send();
     }
-    res.json(item)
-    
+    res.json(item);
   } catch (e) {
-    res.status(500).send()
+    res.status(500).send();
   }
-})
+});
 
-router.patch('/items/:id', auth, async (req, res) => {
-  const updates = Object.keys(req.body)
-  const allowedUpdates = ['sellerId', 'buyerId', 'name', 'ingredients', 'cuisine', 'price', 'status', 'image']
-  const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+router.get("/userItems/:id", async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    const item = await Item.find({ sellerId: _id });
+
+    if (!item) {
+      return res.status(404).send();
+    }
+    res.json(item);
+  } catch (e) {
+    res.status(500).send();
+  }
+});
+
+router.patch("/items/:id", auth, async (req, res) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdates = [
+    "sellerId",
+    "buyerId",
+    "name",
+    "ingredients",
+    "cuisine",
+    "price",
+    "status",
+    "image"
+  ];
+  const isValidOperation = updates.every(update =>
+    allowedUpdates.includes(update)
+  );
 
   if (!isValidOperation) {
-      return res.status(400).send({error : 'Invalid updates!'})
+    return res.status(400).send({ error: "Invalid updates!" });
   }
 
-  try { 
-      const item = await Item.findOne({ _id: req.params.id , sellerId: req.user._id})
+  try {
+    const item = await Item.findOne({
+      _id: req.params.id,
+      sellerId: req.user._id
+    });
 
-      if(!item) {
-          return res.status(404).send()
-      } 
+    if (!item) {
+      return res.status(404).send();
+    }
 
-      updates.forEach((update) => item[update] = req.body[update]) 
-      await item.save()
+    updates.forEach(update => (item[update] = req.body[update]));
+    await item.save();
 
-      res.send(item)
+    res.send(item);
   } catch (e) {
-      res.status(400).send(e)
+    res.status(400).send(e);
   }
-})
+});
 
 const fileFilter = (req, file, cb) => {
   // reject a file

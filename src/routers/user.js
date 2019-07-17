@@ -3,7 +3,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 const User = require("../models/user");
 const auth = require("../middleware/auth");
-const { ObjectID } = require('mongodb')
+const { ObjectID } = require("mongodb");
 const { sendWelcomeEmail, sendCancelationEmail } = require("../emails/account");
 const router = new express.Router();
 
@@ -35,7 +35,7 @@ const upload = multer({
 
 router.post("/signup", upload.single("image"), (req, res, next) => {
   console.log(req.file);
-  sendWelcomeEmail(req.body.email, req.body.name);
+
   const user = new User({
     name: req.body.name,
     email: req.body.email,
@@ -53,6 +53,7 @@ router.post("/signup", upload.single("image"), (req, res, next) => {
   user
     .save()
     .then(result => {
+      sendWelcomeEmail(req.body.email, req.body.name);
       console.log(result);
       res.status(201).json({
         message: "Account created successfully",
@@ -115,35 +116,35 @@ router.get("/users/me", auth, async (req, res) => {
   res.send(req.user);
 });
 
-router.get('/username/:id', async (req, res) => {
-    const _id = req.params.id
+router.get("/username/:id", async (req, res) => {
+  const _id = req.params.id;
 
-    try {
-        const user = await User.findOne({ _id })
+  try {
+    const user = await User.findOne({ _id });
 
-        if(!user){
-            return res.status(404).send()
-        }
-        res.send(JSON.stringify({name: user.name}))
-    } catch (e) {
-        res.status(500).send()
+    if (!user) {
+      return res.status(404).send();
     }
-})
+    res.send(JSON.stringify({ name: user.name }));
+  } catch (e) {
+    res.status(500).send();
+  }
+});
 
-router.get('/user/:id', auth, async (req, res) => {
-    const _id = req.params.id
+router.get("/user/:id", auth, async (req, res) => {
+  const _id = req.params.id;
 
-    try {
-        const user = await User.findOne({ _id })
+  try {
+    const user = await User.findOne({ _id });
 
-        if(!user){
-            return res.status(404).send()
-        }
-        res.send(JSON.stringify(user))
-    } catch (e) {
-        res.status(500).send()
+    if (!user) {
+      return res.status(404).send();
     }
-})
+    res.send(JSON.stringify(user));
+  } catch (e) {
+    res.status(500).send();
+  }
+});
 
 router.patch("/users/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
