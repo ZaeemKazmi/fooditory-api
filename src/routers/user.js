@@ -142,7 +142,7 @@ router.get('/user/:id', auth, async (req, res) => {
   try {
     const transactions = await Item.aggregate([
       {
-          $match: {sellerId: seller._id, buyerId: req.user._id}
+        $match: {sellerId: seller._id, buyerId: req.user._id}
       },
       {
         $group: {
@@ -157,11 +157,29 @@ router.get('/user/:id', auth, async (req, res) => {
 
     seller = seller.toObject();
     seller["allowReview"] = transactions.length > pastReviews.length;
+
+    const stars = await Review.aggregate([
+      {
+        $match: { sellerId: seller._id }
+      },
+      {
+        $group: {
+          _id: "$sellerId",
+          stars: {
+            $avg: "$stars"
+          }
+        }
+      }
+    ]);
+    seller["stars"] = (stars.length > 0) ? stars[0].stars : 0;
+    console.log("stars", stars);
+    console.log(seller);
     res.json(seller);
   } catch (e) {
     console.log(e);
     res.status(500).send();
   }
+
 })
 
 router.patch("/users/me", auth, async (req, res) => {

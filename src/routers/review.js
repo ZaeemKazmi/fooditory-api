@@ -65,7 +65,6 @@ router.get('/users/:id/reviews', async (req, res) => {
 
     try {
         const reviews = await Review.find({sellerId: user});
-
         res.json(reviews);
     } catch (e) {
         res.status(500).send(e)
