@@ -3,6 +3,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 const User = require("../models/user");
 const Item = require("../models/item");
+const Review = require('../models/review');
 const auth = require("../middleware/auth");
 const { ObjectID } = require('mongodb')
 const { sendWelcomeEmail, sendCancelationEmail } = require("../emails/account");
@@ -139,10 +140,23 @@ router.get('/user/:id', auth, async (req, res) => {
   }
 
   try {
-    const transactions = await Item.findOne({sellerId: seller, buyerId: req.user});
+    const transactions = await Item.aggregate([
+      {
+          $match: {sellerId: seller._id, buyerId: req.user._id}
+      },
+      {
+        $group: {
+          _id: {
+            yearMonthDay: { $dateToString: { format: "%Y-%m-%d", date: "$soldAt" }}
+          }
+        }
+      }
+    ]);
+
+    const pastReviews = await Review.find({sellerId: seller, buyerId: req.user});
 
     seller = seller.toObject();
-    seller["allowReview"] = transactions != null;
+    seller["allowReview"] = transactions.length > pastReviews.length;
     res.json(seller);
   } catch (e) {
     console.log(e);

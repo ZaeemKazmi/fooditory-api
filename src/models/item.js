@@ -45,6 +45,10 @@ const itemSchema = new mongoose.Schema(
     image: {
       type: String,
       required: true
+    },
+    soldAt: {
+      type: Date,
+      required: false
     }
   },
   {

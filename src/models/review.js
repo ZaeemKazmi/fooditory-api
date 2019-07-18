@@ -21,7 +21,7 @@ const reviewSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  point: {
+  stars: {
     type: Number,
     required: true
   }
