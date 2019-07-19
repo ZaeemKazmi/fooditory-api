@@ -29,7 +29,7 @@ const itemSchema = new mongoose.Schema(
       trim: true
     },
     price: {
-      type: String,
+      type: Number,
       required: [true, "Price cannot be blank."],
       trim: true
     },

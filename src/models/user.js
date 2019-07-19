@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: [true, "Your display name cannot be blank."],
+      required: [true, "Email cannot be blank."],
       trim: true,
       lowercase: true,
       unique: true,
