@@ -3,13 +3,14 @@ const mongoose = require("mongoose");
 const itemSchema = new mongoose.Schema(
   {
     sellerId: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.ObjectId, 
+      required: true,
       ref: 'User'
     },
     buyerId: {
-      type: String,
-      trim: true
+      type: mongoose.Schema.Types.ObjectId, 
+      required: false,
+      ref: 'User'
     },
     name: {
       type: String,
@@ -44,6 +45,10 @@ const itemSchema = new mongoose.Schema(
     image: {
       type: String,
       required: true
+    },
+    soldAt: {
+      type: Date,
+      required: false
     }
   },
   {

@@ -2,6 +2,8 @@ const express = require("express");
 const multer = require("multer");
 const sharp = require("sharp");
 const User = require("../models/user");
+const Item = require("../models/item");
+const Review = require('../models/review');
 const auth = require("../middleware/auth");
 const { ObjectID } = require("mongodb");
 const { sendWelcomeEmail, sendCancelationEmail } = require("../emails/account");
@@ -131,17 +133,50 @@ router.get("/username/:id", async (req, res) => {
   }
 });
 
-router.get("/user/:id", auth, async (req, res) => {
-  const _id = req.params.id;
+router.get('/user/:id', auth, async (req, res) => {
+  let seller = await User.findOne({_id: req.params.id});
+  if (seller == null) {
+    res.status(400).json({error: "The user does not exist"});
+    return;
+  }
 
   try {
-    const user = await User.findOne({ _id });
+    const transactions = await Item.aggregate([
+      {
+        $match: {sellerId: seller._id, buyerId: req.user._id}
+      },
+      {
+        $group: {
+          _id: {
+            yearMonthDay: { $dateToString: { format: "%Y-%m-%d", date: "$soldAt" }}
+          }
+        }
+      }
+    ]);
 
-    if (!user) {
-      return res.status(404).send();
-    }
-    res.send(JSON.stringify(user));
+    const pastReviews = await Review.find({sellerId: seller, buyerId: req.user});
+
+    seller = seller.toObject();
+    seller["allowReview"] = transactions.length > pastReviews.length;
+
+    const stars = await Review.aggregate([
+      {
+        $match: { sellerId: seller._id }
+      },
+      {
+        $group: {
+          _id: "$sellerId",
+          stars: {
+            $avg: "$stars"
+          }
+        }
+      }
+    ]);
+    seller["stars"] = (stars.length > 0) ? stars[0].stars : 0;
+
+    res.json(seller);
   } catch (e) {
+    console.log(e);
     res.status(500).send();
   }
 });
@@ -176,6 +211,11 @@ router.delete("/users/me", auth, async (req, res) => {
   }
 });
 
+router.get("/users", async (req, res) => {
+  const users = await User.find();
+  res.send(users);
+});
+
 router.delete("/users/me/avatar", auth, async (req, res) => {
   req.user.avatar = undefined;
   await req.user.save();
@@ -185,15 +225,16 @@ router.delete("/users/me/avatar", auth, async (req, res) => {
 router.get("/users/:id/avatar", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
+    console.log(user);
 
-    if (!user || !user.avatar) {
+    if (!user || !user.image) {
       throw new Error();
     }
 
-    res.set("Content-Type", "image/png");
-    res.send(user.avatar);
+    res.sendfile(user.image);
   } catch (e) {
-    res.status(400).send(e);
+    console.log(e);
+    res.status(500).send(e);
   }
 });
 
