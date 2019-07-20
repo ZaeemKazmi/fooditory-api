@@ -5,8 +5,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 
 const Item = require("../models/item");
-const User = require('../models/user')
-
+const User = require("../models/user");
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -123,11 +122,20 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
+router.delete("/item/delete/:id", async (req, res) => {
+  const item = await Item.findOne({ _id: req.params.id });
+  try {
+    await item.remove();
+    res.send(req.params.id);
+  } catch (e) {
+    res.status(400).send(e);
+  }
+});
 
 router.post("/item", auth, upload.single("image"), async (req, res, next) => {
-  const user = await User.findOne({_id: req.user._id});
+  const user = await User.findOne({ _id: req.user._id });
   if (user == null) {
-    res.status(404).json({error: "The user does not exist"});
+    res.status(404).json({ error: "The user does not exist" });
     return;
   }
 
@@ -166,20 +174,20 @@ router.post("/item", auth, upload.single("image"), async (req, res, next) => {
     });
 });
 
-router.get('/:user_id/items', async (req, res) => {
-  const user = await User.findOne({_id: req.params.user_id});
+router.get("/:user_id/items", async (req, res) => {
+  const user = await User.findOne({ _id: req.params.user_id });
   if (user == null) {
-    res.status(400).json({error: "The user does not exist"});
+    res.status(400).json({ error: "The user does not exist" });
     return;
   }
 
   try {
-    const items = await Item.find({sellerId: user._id, status: true});
+    const items = await Item.find({ sellerId: user._id, status: true });
 
-    res.send(items)
+    res.send(items);
   } catch (e) {
-    res.status(400).send(e)
+    res.status(400).send(e);
   }
-})
+});
 
 module.exports = router;
