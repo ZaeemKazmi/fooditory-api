@@ -140,6 +140,7 @@ router.post("/item", auth, upload.single("image"), async (req, res, next) => {
   }
 
   const item = new Item({
+    buyerId: null,
     sellerId: user,
     name: req.body.name,
     ingredients: req.body.ingredients,
