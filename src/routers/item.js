@@ -132,16 +132,10 @@ router.delete("/item/delete/:id", async (req, res) => {
   }
 });
 
-router.post("/item", auth, upload.single("image"), async (req, res, next) => {
-  const user = await User.findOne({ _id: req.user._id });
-  if (user == null) {
-    res.status(404).json({ error: "The user does not exist" });
-    return;
-  }
-
+router.post("/item", upload.single("image"), (req, res, next) => {
   const item = new Item({
     buyerId: null,
-    sellerId: user,
+    sellerId: req.body.sellerId,
     name: req.body.name,
     ingredients: req.body.ingredients,
     cuisine: req.body.cuisine,
@@ -168,9 +162,8 @@ router.post("/item", auth, upload.single("image"), async (req, res, next) => {
       });
     })
     .catch(err => {
-      console.log(err);
       res.status(500).json({
-        error: err
+        error: err.errmsg
       });
     });
 });
