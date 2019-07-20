@@ -74,7 +74,7 @@ const userSchema = new mongoose.Schema(
     },
     countryOfOrigin: {
       type: String,
-      required: [true, "Your password cannot be blank."],
+      required: [true, "CountryOfOrigin cannot be blank."],
       trim: true,
       lowercase: true
     },
