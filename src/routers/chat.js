@@ -2,9 +2,11 @@ const express = require('express')
 const auth = require('../middleware/auth')
 const http = require('http')
 const socketio = require('socket.io')
+const User = require("../models/user");
 const Chat = require('../models/chat')
 const Message = require('../models/message')
 const { ObjectID } = require('mongodb')
+const { sentMessageEmail } = require("../emails/account");
 const router = new express.Router()
 
 const setIo = server => {
@@ -27,7 +29,7 @@ const setIo = server => {
                     $or: [
                         { itemId: new ObjectID(data["itemId"]), buyerId: new ObjectID(data["senderId"]) },
                         // { itemId: new ObjectID(data["itemId"]), sellerId: new ObjectID(data["senderId"]) },
-                        {_id}
+                        { _id }
                     ]
                 })
 
@@ -53,13 +55,19 @@ const setIo = server => {
 
                         const newMessage = await message.save()
 
-                        
+
                         if (newMessage === message) {
                             const toId = data["receiverId"]
                             console.log(toId)
                             io.emit(toId, data)
+
+                            const sender = await User.findOne({ _id: new ObjectID(data["senderId"]) })
+                            const receiver = await User.findOne({ _id: new ObjectID(data["receiverId"]) })
+                            if (sender !== null && receiver !== null) {
+                                sentMessageEmail(receiver.email, receiver.name, sender.name, message.msg)
+                            }
                         } else {
-                            const chatRollback = await Task.findOneAndDelete({ _id: chat._id })
+                            const chatRollback = await Chat.findOneAndDelete({ _id: chat._id })
                             throw {
                                 name: "First-Message sending failure",
                                 message: "Failed chat message rollbacked"
@@ -78,6 +86,12 @@ const setIo = server => {
                         const toId = data["receiverId"]
                         console.log(toId)
                         io.emit(toId, data)
+
+                        const sender = await User.findOne({ _id: new ObjectID(data["senderId"]) })
+                        const receiver = await User.findOne({ _id: new ObjectID(data["receiverId"]) })
+                        if (sender !== null && receiver !== null) {
+                            sentMessageEmail(receiver.email, receiver.name, sender.name, message.msg)
+                        }
                     } else {
                         throw {
                             name: "Existing Chat-Message sending failure",
@@ -131,7 +145,7 @@ router.get('/conversations', auth, async (req, res) => {
                 { "buyerId": req.user._id },
                 { "sellerId": req.user._id }
             ],
-        }).sort({ "updatedAt": -1}).populate('messages').exec();
+        }).sort({ "updatedAt": -1 }).populate('messages').exec();
         res.json(chats)
     } catch (e) { console.log(e) }
 })
@@ -146,7 +160,7 @@ router.get('/chats', auth, async (req, res) => {
                 { "buyerId": req.user._id },
                 { "sellerId": req.user._id }
             ],
-        }).sort({ "updatedAt": -1});
+        }).sort({ "updatedAt": -1 });
         res.json(chats)
     } catch (e) { console.log(e) }
 })
@@ -156,13 +170,15 @@ router.get('/messages/:id', auth, async (req, res) => {
     const _id = req.params.id
 
     try {
-        const chat = await Chat.findOne({ _id , 
+        const chat = await Chat.findOne({
+            _id,
             "$or": [
-            { "buyerId": req.user._id },
-            { "sellerId": req.user._id }
-        ]}).sort({ "createdAt": 1}).populate('messages').exec();
+                { "buyerId": req.user._id },
+                { "sellerId": req.user._id }
+            ]
+        }).sort({ "createdAt": 1 }).populate('messages').exec();
 
-        if(!chat){
+        if (!chat) {
             return res.status(404).send()
         }
         res.json(chat.messages)
