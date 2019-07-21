@@ -238,4 +238,23 @@ router.get("/users/:id/avatar", async (req, res) => {
   }
 });
 
+router.get("/userData/:id", async(req, res)=>{
+  
+  try {
+    
+    const user = await User.findOne({ _id: req.params.id });
+
+    if (!user) {
+      return res.status(404).send();
+    }
+
+    res.send(user);
+  
+  } catch (e) {
+    
+    res.status(500).send();
+  }
+
+});
+
 module.exports = router;

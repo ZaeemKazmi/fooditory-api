@@ -51,50 +51,43 @@ router.get("/items/:id", async (req, res) => {
   }
 });
 
+
 async function iterate(users, Item){
   
-  var items = [];
+    var items = [];
+    var item;
+    var aa = [];
 
-  for( let user of users ){
-
-    console.log("user: " + JSON.stringify(user));
-
-    Item.find({ sellerId: user._id }, (error, userItems)=>{
+    for ( let user of users ){
       
-      items = [...userItems];
+      item = await Item.find({sellerId: user._id});
 
-    });
+      console.log(`item before: ${JSON.stringify(item)}`);
+      
+      items = items.concat(item);
+    }
 
-  }
-
-  return items;
+    return items;
 }
 
 router.get("/accItems/:accName", async (req, res) => {
 
-  let items = [];
-
-  console.log(`accName: ${ req.params.accName}`);
+  var items = [];
 
   try{
-
     User.find({ "accommodation.name" : req.params.accName }, async (error, users) => {
-
       if (error){
-
         res.status(500).sned();
       }
 
-      console.log(`Users: ${JSON.stringify(users)}`);
-  
-      items = await iterate(users, Item);
+      items = await iterate(users, Item)
+
+      console.log(`items: ${JSON.stringify(items)}`);
 
       res.send(items);
-
     });
     
   }catch(exp){
-
     res.status(500).send();
   }
 
