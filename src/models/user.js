@@ -23,14 +23,12 @@ const accommodationSchema = new mongoose.Schema({
   city: {
     type: String,
     required: [true, "Your city cannot be blank."],
-    trim: true,
-    lowercase: true
+    trim: true
   },
   country: {
     type: String,
     required: [true, "Your country cannot be blank."],
-    trim: true,
-    lowercase: true
+    trim: true
   }
 });
 
