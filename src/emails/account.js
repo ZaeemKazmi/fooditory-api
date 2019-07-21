@@ -288,7 +288,17 @@ const sendCancelationEmail = (email, name) => {
   });
 };
 
+const sentMessageEmail = (email, receiverName, senderName, message) => {
+  sgMail.send({
+    to: email,
+    from: "noreply@fooditory.com",
+    subject: `You received a message!`,
+    text: `Hey ${receiverName}. You received following message from ${senderName}: \n ${message}.`
+  });
+};
+
 module.exports = {
   sendWelcomeEmail,
-  sendCancelationEmail
+  sendCancelationEmail,
+  sentMessageEmail
 };

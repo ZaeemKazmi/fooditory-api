@@ -59,7 +59,7 @@ const setIo = server => {
                             console.log(toId)
                             io.emit(toId, data)
                         } else {
-                            const chatRollback = await Task.findOneAndDelete({ _id: chat._id })
+                            const chatRollback = await Chat.findOneAndDelete({ _id: chat._id })
                             throw {
                                 name: "First-Message sending failure",
                                 message: "Failed chat message rollbacked"
