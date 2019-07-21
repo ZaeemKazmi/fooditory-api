@@ -168,11 +168,13 @@ router.get('/user/:id', auth, async (req, res) => {
           _id: "$sellerId",
           stars: {
             $avg: "$stars"
-          }
+          },
+          reviews: { $sum: 1 }
         }
       }
     ]);
     seller["stars"] = (stars.length > 0) ? stars[0].stars : 0;
+    seller["reviews"] = (stars.length > 0) ? stars[0].reviews : 0;
 
     res.json(seller);
   } catch (e) {
