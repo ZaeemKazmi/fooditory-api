@@ -1,4 +1,4 @@
-Inorder to execute this nodeJs backend project follow these steps:
+Inorder to execute this Node.js backend project follow these steps:
 
 1) Download config folder from following google drive link 
 [https://drive.google.com/drive/folders/1nCLHN1d39lHEqGIKH0kmGxk_MSfM9OrS?usp=sharing] and put it inside the fooditory-api 
