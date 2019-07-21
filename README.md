@@ -7,4 +7,4 @@ project, such that the path is forexample: fooditory-api/config/dev.env
 -So far app have been tested in development mode only, therefore please use the app in development mode, by using command
 <b>npm run dev</b>
 
--In order to stop the application, please use Ctrl + C keys
+-In order to stop the application, please use <b>Ctrl + C</b> keys
